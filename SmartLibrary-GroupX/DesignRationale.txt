@@ -1,0 +1,28 @@
+Design Rationale for SmartLibrary Mini Project
+
+1. Overview
+This document explains design decisions for the Mini Library Management System, focusing on data structures, operations, and data integrity.
+
+2. Data Structures
+- Books (dictionary keyed by ISBN):
+  Rationale: Dictionaries provide O(1) average-time lookup by ISBN, which mirrors real-world library lookups by unique identifiers. Storing books in a dictionary ensures quick retrieval for borrowing, updating, and deletion operations. Each book record contains `title`, `author`, `genre`, `total_copies` (original total), and `available_copies` (current available).
+- Members (list of dictionaries):
+  Rationale: A list of member dictionaries is simple and appropriate for small to medium datasets found in educational assignments. Iteration and simple membership checks are straightforward; operations such as searching by `member_id` are implemented via linear scan. The simplicity satisfies the "no OOP" constraint and keeps the code readable for instructional purposes.
+- Genres (tuple):
+  Rationale: Genres are a fixed set of categories that should not change during program execution. A tuple is immutable and protects these constant categories from accidental modification.
+
+3. Functions and Real-World Modelling
+- `add_book`, `add_member`: Model real-world registration of books and members; they validate uniqueness and genre correctness.
+- `borrow_book`: Checks book availability and member borrowing limits (3 books). On success, it decrements `available_copies` and records the loan in the member's `borrowed_books` list — this models the checkout process and enforces loan limits.
+- `return_book`: Reverses a checkout by increasing `available_copies` and removing the ISBN from the member record.
+- `search_books`, `update_*`, `delete_*`: Provide CRUD functionality for catalog and member data, enabling maintainers to amend or remove outdated or mis-entered records.
+
+4. Data Integrity & Constraints
+- Unique ISBNs: enforced by using ISBN as the key in the `books` dictionary.
+- Valid Genres: enforced by checking the genre against the `GENRES` tuple on book creation and update.
+- Borrow limits: members are limited to 3 concurrent borrowed books; attempts to exceed this limit are rejected.
+- Deleting entities: A book can only be deleted when `available_copies` equals `total_copies` (i.e., no copies are currently borrowed). A member can only be deleted when they have no borrowed books. This prevents orphaned loans and preserves inventory consistency.
+- Updating total copies: When reducing `total_copies`, the code disallows reductions below currently borrowed copies to avoid impossible states.
+
+5. Final Notes
+The system uses only lists, dictionaries and tuples and is structured procedurally to meet the assignment's constraints. The code contains docstrings and clear function boundaries to support testing and future extension.
